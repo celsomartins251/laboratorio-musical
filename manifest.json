@@ -3,7 +3,7 @@
   "short_name": "Lab. Musical",
   "description": "Laboratório Musical com banco de sons embutido",
   "lang": "pt-BR",
-  "start_url": "https://celsomartins251.github.io/laboratorio-musical/?v=lm-v13",
+  "start_url": "https://celsomartins251.github.io/laboratorio-musical/?v=lm-v14",
   "scope": "https://celsomartins251.github.io/laboratorio-musical/",
   "display": "standalone",
   "orientation": "any",

@@ -1191,7 +1191,7 @@ function sfSample(sf,idx){
     b.copyToChannel(f,0);sf.cache[idx]=b;delete sf.pend[idx];return b;
   })().catch(e=>{delete sf.pend[idx];sf.cache[idx]=null;throw e;});
 }
-const SF_TRIM={piano:.6,bass:.85,drums:1.05};
+const SF_TRIM={piano:.78,bass:.85,drums:1.05};
 const SF_DRUM={kick:[36,35],snare:[38,40],rim:[37,38],hh:[42],hhp:[44],ride:[51,59],shaker:[70],conga:[63,64],clave:[75],cowbell:[56]};
 const SF_DNOTES=[35,36,37,38,40,42,44,46,51,56,59,63,64,70,75];
 function sfPlay(slot,key,midi,t,dur,vel){
@@ -1288,7 +1288,10 @@ async function sfLoadEmbedded(){
     if(first)toast('Baixando o banco de sons (23 MB). Só na primeira vez.',4500);
     const blob=await sfEmbBlob();
     const sf=await sfParse(blob);sf.emb=true;SF.sf=sf;SF.ex={};
-    try{if(first){if(!S.tim.piano&&!S.tim.bass&&!S.tim.kit)sfApplyDefaults();localStorage.setItem('lm.sfemb','1');toast('Banco de sons instalado: '+sf.presets.length+' timbres',3000);}}catch(e){}
+    /* No banco embutido, prioriza piano acústico GM (programas 0–3). Mantém os demais timbres e configurações. */
+    const pianoAcustico=['sf:0:0','sf:0:1','sf:0:2','sf:0:3'].find(k=>sfHas(k));
+    if(pianoAcustico&&(!S.tim.piano||!/^sf:0:[0-3]$/.test(S.tim.piano)))S.tim.piano=pianoAcustico;
+    try{saveSoon();if(first){if(!S.tim.bass&&!S.tim.kit)sfApplyDefaults();localStorage.setItem('lm.sfemb','1');toast('Banco de sons instalado: '+sf.presets.length+' timbres',3000);}}catch(e){}
     sfStatus(sfStatusText());
     for(const [slot,k] of [['piano',S.tim.piano],['bass',S.tim.bass],['drums',S.tim.kit]])if(sfHas(k))await sfSlotLoad(slot,k,false);
     return true;
@@ -3024,5 +3027,5 @@ document.addEventListener('keydown',function(e){
   else{const b=document.getElementById('rl-play');if(b)b.click();}
 });
 </script><script>(function(){var s=document.getElementById('splash');if(!s)return;var done=false;function go(){if(done)return;done=true;s.classList.add('out');setTimeout(function(){s.remove();},800);}
-s.addEventListener('click',go);setTimeout(go,2600);})();</script><script>if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',function(){navigator.serviceWorker.register('/laboratorio-musical/sw.js').catch(function(e){console.warn('SW',e);});});</script></body></html>
+s.addEventListener('click',go);setTimeout(go,2600);})();</script><script>if('serviceWorker' in navigator&&location.protocol!=='file:')window.addEventListener('load',function(){navigator.serviceWorker.register('/laboratorio-musical/sw.js',{updateViaCache:'none'}).then(function(reg){reg.update().catch(function(e){console.warn('SW update',e);});}).catch(function(e){console.warn('SW',e);});});</script></body></html>
 
