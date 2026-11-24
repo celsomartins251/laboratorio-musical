@@ -231,6 +231,18 @@ body[data-v=editor] #nav,body.pl-on #nav{display:none}
 #v-player.playing #ctrl{position:absolute;top:8px;left:0;right:0;border:0;background:transparent;padding:0;pointer-events:none;z-index:4}
 #v-player.playing #countbadge{margin:0 auto}
 #v-player.playing #chartwrap{padding-top:34px;margin-top:8px}
+/* Controles sob demanda durante a reprodução: tocar na cifra revela sem pausar. */
+#v-player.playing.controls-visible #ctrl{position:absolute;top:auto;left:0;right:0;bottom:0;z-index:6;padding:8px 14px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(0,0,0,.86) 18%,rgba(0,0,0,.96));pointer-events:auto}
+#v-player.playing.controls-visible .tabs{display:grid}
+#v-player.playing.controls-visible .stylebtn{display:flex;width:calc(100% - 66px);margin-top:8px}
+#v-player.playing.controls-visible #panel{display:block}
+#v-player.playing.controls-visible #countbadge{display:none!important}
+#v-player.playing.controls-visible #fab{display:none}
+#v-player.playing.controls-visible #fabm{top:10px;bottom:auto;right:12px}
+#live-pause{display:none;position:absolute;right:14px;bottom:8px;width:54px;height:50px;border:1px solid var(--ac);border-radius:16px;background:var(--bg2);color:var(--ac);place-items:center;z-index:8}
+#live-pause svg{width:25px;height:25px}
+#v-player.playing.controls-visible #live-pause{display:grid}
+#v-player.playing.controls-visible #panel{max-height:min(48vh,420px)}
 
 /* ===== editor ===== */
 #edgrid{flex:1;overflow:auto;padding-bottom:20px}
@@ -435,6 +447,7 @@ body[data-v=editor] #nav,body.pl-on #nav{display:none}
       <div id="countbadge"></div>
       <div class="tabs"><button id="t-bpm"></button><button id="t-reps"></button><button id="t-key"></button><button id="t-loop">Loop</button><button id="b-stop" class="sq" aria-label="Parar"></button></div>
       <button class="stylebtn" id="t-style"></button>
+      <button id="live-pause" aria-label="Pausar reprodução" title="Pausar"></button>
     </div>
   </section>
 
@@ -1900,6 +1913,8 @@ function togglePlay(){
   closePanel();$('#v-player').classList.add('playing');document.body.classList.add('pl-on');$('#fab').innerHTML=ic('pause');
 }
 $('#fab').onclick=togglePlay;
+$('#live-pause').onclick=togglePlay;
+$('#chartwrap').addEventListener('click',e=>{if(!Pl.on)return;if(e.target.closest('button,a,input,select,textarea'))return;$('#v-player').classList.toggle('controls-visible');});
 function mixLive(){
   const v=$('#v-player');
   if(v.classList.contains('mixlive')){v.classList.remove('mixlive');closePanel();return;}
