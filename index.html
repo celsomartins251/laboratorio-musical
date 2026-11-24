@@ -727,17 +727,17 @@ function makeRnd(seed){let s=seed>>>0||1;return()=>{s=(s*1664525+1013904223)>>>0
 const ev=(i,offs,v)=>offs.map(o=>[i,o,v]);
 const STYLES=[
  {id:'swing',g:'Jazz',n:'Medium Swing',bpm:120,sw:.667,piano:'piano',bass:'acoustic',kit:'kit',bk:'walk',
-  d4:[...ev('ride',[0,1,1.5,2,3,3.5],.62),...ev('hhp',[1,3],.55),...ev('kick',[0,1,2,3],.11)],
-  d3:[...ev('ride',[0,1,1.5,2],.6),...ev('hhp',[1,2],.5),...ev('kick',[0],.12)],
-  c4:[[[0,1.3],[1.5,.5]],[[1.5,.6],[3,.7]],[[0,.7],[2.5,.5]],[[0,.9],[1.5,.5],[3.5,.4]]],c3:[[[0,1],[1.5,.6]],[[1,.9],[2,.9]]]},
+  d4:[...ev('ride',[0,1.5,2,3.5],.66),...ev('hhp',[1,3],.5),...ev('kick',[0,2],.09)],
+  d3:[...ev('ride',[0,1.5,2],.62),...ev('hhp',[1],.46),...ev('kick',[0],.1)],
+  c4:[[[0,1.2],[1.5,.45]],[[1,.45],[2.5,.45]],[[0,.7],[2.5,.4]],[[1.5,.45],[3,.65]]],c3:[[[0,1],[1.5,.5]],[[1,.8],[2,.8]]]},
  {id:'medup',g:'Jazz',n:'Medium Up Swing',bpm:160,sw:.64,piano:'piano',bass:'acoustic',kit:'kit',bk:'walk',
-  d4:[...ev('ride',[0,1,1.5,2,3,3.5],.62),...ev('hhp',[1,3],.55),...ev('kick',[0,1,2,3],.1)],
-  d3:[...ev('ride',[0,1,1.5,2],.6),...ev('hhp',[1,2],.5)],
-  c4:[[[1.5,.5],[3,.6]],[[0,.8],[2.5,.5]],[[1.5,.5]]],c3:[[[1,.9],[2,.9]]]},
+  d4:[...ev('ride',[0,1,1.5,2,3,3.5],.62),...ev('hhp',[1,3],.52),...ev('kick',[0,2],.08)],
+  d3:[...ev('ride',[0,1,1.5,2],.6),...ev('hhp',[1,2],.48)],
+  c4:[[[.5,.4],[1.5,.45],[3,.5]],[[0,.6],[2.5,.4]],[[1,.4],[2.5,.45],[3.5,.4]],[[1.5,.5],[3,.55]]],c3:[[[1,.8],[2,.8]],[[0,.65],[2,.75]]]},
  {id:'uptempo',g:'Jazz',n:'Up Tempo Swing',bpm:230,sw:.6,piano:'piano',bass:'acoustic',kit:'kit',bk:'walk',
-  d4:[...ev('ride',[0,1,1.5,2,3,3.5],.6),...ev('hhp',[1,3],.5),...ev('kick',[0,2],.08)],
-  d3:[...ev('ride',[0,1,1.5,2],.58),...ev('hhp',[1,2],.5)],
-  c4:[[[1.5,.4]],[[0,.5],[2.5,.4]],[[3.5,.4]]],c3:[[[1,.7]]]},
+  d4:[...ev('ride',[0,.5,1,1.5,2,2.5,3,3.5],.47),...ev('hhp',[1,3],.42),...ev('kick',[0,2],.07)],
+  d3:[...ev('ride',[0,.5,1,1.5,2,2.5],.45),...ev('hhp',[1,2],.4),...ev('kick',[0],.07)],
+  c4:[[[1.5,.35],[3.5,.35]],[[.5,.35],[2.5,.35]],[[1,.35],[3,.35]],[[1.5,.4],[2.5,.3],[3.5,.35]]],c3:[[[1,.65]],[[0,.55],[2,.6]]]},
  {id:'two',g:'Jazz',n:'Swing 2-Feel',bpm:130,sw:.667,piano:'piano',bass:'acoustic',kit:'brush',bk:'two',
   d4:[...ev('ride',[0,1,1.5,2,3,3.5],.5),...ev('hhp',[1,3],.5)],d3:[...ev('ride',[0,1,1.5,2],.5),...ev('hhp',[1,2],.5)],
   c4:[[[0,1.3],[1.5,.5]],[[1.5,.6],[3,.7]]],c3:[[[0,1],[1.5,.6]]]},
@@ -748,8 +748,8 @@ const STYLES=[
   d4:[...ev('ride',[0,1,1.5,2,3,3.5],.55),...ev('hhp',[1,3],.5)],
   d3:[...ev('ride',[0,1,1.5,2],.6),...ev('hhp',[1,2],.55),...ev('kick',[0],.14)],
   c4:[[[0,1],[1.5,.5]]],c3:[[[1,.8],[2,.8]],[[0,.6],[1.5,.5],[2,.8]],[[1,.8]]]},
- {id:'guitar',g:'Jazz',n:'Guitar Trio',bpm:140,sw:.667,piano:'guitar',bass:'acoustic',kit:'none',bk:'walk',
-  d4:[],d3:[],c4:[[[0,.7],[1,.7],[2,.7],[3,.7]]],c3:[[[0,.7],[1,.7],[2,.7]]]},
+ {id:'guitar',g:'Jazz',n:'Guitar Trio',bpm:140,sw:.667,piano:'guitar',bass:'acoustic',kit:'brush',bk:'walk',
+  d4:[...ev('snare',[0,1,2,3],.28),...ev('ride',[0,1,2,3],.12)],d3:[...ev('snare',[0,1,2],.25),...ev('ride',[0,1,2],.1)],c4:[[[0,.7],[1,.7],[2,.7],[3,.7]]],c3:[[[0,.7],[1,.7],[2,.7]]]},
  {id:'gypsy',g:'Jazz',n:'Gypsy Jazz',bpm:150,sw:.6,piano:'guitar',bass:'acoustic',kit:'brush',bk:'quarter',
   d4:[...ev('ride',[0,1,2,3],.26),...ev('snare',[1,3],.28),...ev('kick',[0,2],.12)],
   d3:[...ev('ride',[0,1,2],.24),...ev('snare',[1],.26),...ev('kick',[0],.1)],c4:[[[0,.35],[1,.35],[2,.35],[3,.35],[1.5,.2],[3.5,.2]]],c3:[[[0,.35],[1,.35],[2,.35]]]},
@@ -1084,15 +1084,22 @@ function pianoSample(m,t,dur,vel){
   s.connect(g);g.connect(p);p.connect(Au.piano);s.start(t);s.stop(rel+1.2);
 }
 /* ---- bateria ---- */
+function brushSweep(t,dur,v,dest){
+  const C=Au.ctx,s=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();
+  s.buffer=Au.noise;s.loop=true;f.type='bandpass';f.Q.value=.72;
+  f.frequency.setValueAtTime(1500,t);f.frequency.linearRampToValueAtTime(5200,t+dur*.48);f.frequency.linearRampToValueAtTime(2100,t+dur);
+  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.075*v,t+dur*.16);g.gain.setValueAtTime(.075*v,t+dur*.58);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  s.connect(f);f.connect(g);g.connect(dest||Au.drums);s.start(t,Math.random()*1.5);s.stop(t+dur+.02);
+}
 function drum(inst,t,v,kit){
   if(kit==='none')return;
   if(typeof kit==='string'&&kit.startsWith('sf:')){if(sfDrumPlay(inst,kit,t,v))return;kit='kit';}
   const C=Au.ctx,D=Au.drums,S=Au.ds;
   if(kit==='perc'){ if(inst==='ride'||inst==='hh')inst='shaker'; else if(['snare','hhp'].includes(inst))return; }
   if(kit==='brush'){
-    if(inst==='ride'){nz(t,.26,'bandpass',5200,.5,.07*v,D,.035);nz(t,.2,'highpass',8500,.6,.03*v,D,.03);return;}
-    if(inst==='snare'){nz(t,.3,'bandpass',3300,.5,.11*v,D,.07);nz(t,.22,'highpass',6500,.6,.04*v,D,.06);tone('sine',190,t,t+.07,D,.05*v);return;}
-    if(inst==='kick'){v*=.5;}
+    if(inst==='ride'){brushSweep(t,.22,.24*v,D);return;}
+    if(inst==='snare'){brushSweep(t,.46,.95*v,D);return;}
+    if(inst==='kick'){v*=.42;}
   }
   const dk=x=>2500+Math.min(1,x)*13500; /* mais suave = mais escuro */
   switch(inst){
@@ -2005,7 +2012,7 @@ function pStyle(pin){
   const cur=P.song.style;let h='<div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap"><button class="sub" id="ps-midi-import">＋ Importar MIDI do aparelho</button><button class="sub" id="ps-midi-repo">Carregar MIDI do repositório</button><input type="file" id="ps-midi-file" accept=".mid,.midi,audio/midi" hidden></div>'; 
   ['Jazz','Ritmos Brasileiros','Latin','Pop'].forEach(g=>{h+='<div class="gh">'+g+'</div>'+STYLES.filter(s=>s.g===g).map(s=>'<div class="stl'+(s.id===cur?' on':'')+'" data-s="'+s.id+'"><span>'+esc(s.n)+'</span><span class="g">'+s.bpm+' bpm'+(s.id===cur?' ✓':'')+'</span></div>').join('');});
   pin.style.padding='0';pin.innerHTML=h;
-  $$('.stl',pin).forEach(el=>el.onclick=()=>{P.song.style=el.dataset.s;delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
+  $('.stl',pin).forEach(el=>el.onclick=()=>{const selected=styleById(el.dataset.s);P.song.style=selected.id;P.song.bpm=selected.bpm;if(Pl.on){Pl.bpm=selected.bpm;Pl.lastShownBpm=-1;}delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
   $('#ps-midi-import',pin).onclick=()=>$('#ps-midi-file',pin).click();
   $('#ps-midi-file',pin).onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const d=window.LMMidiReader.parse(await file.arrayBuffer(),file.name),s=midiImportData(d);P.song.style=s.id;P.song.bpm=d.bpm||P.song.bpm;saveSoon();updateCtrl();pStyle(pin);}catch(err){toast('Falha ao ler MIDI: '+(err.message||err),4000);}e.target.value='';};
   $('#ps-midi-repo',pin).onclick=()=>midiLoadRepository(pin);
