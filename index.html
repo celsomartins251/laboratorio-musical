@@ -579,6 +579,7 @@ body[data-v=editor] #nav,body.pl-on #nav{display:none}
   <button id="b-diag"><i></i><span>Diagramas</span></button>
 </nav>
 <div id="modal"></div><div id="toast"></div><input type="file" id="file" multiple hidden>
+<script src="./midi-reader.js"></script>
 <script>
 'use strict';
 /* ======================= TEORIA / DADOS ======================= */
@@ -793,6 +794,12 @@ const STYLES=[
 ];
 STYLES.forEach(s=>{s.full=s.g+'-'+s.n;});
 const styleById=id=>STYLES.find(s=>s.id===id)||STYLES[0];
+const MIDI_STORE='lm.midi.styles.v1';
+function midiStyleAdd(d,id){const sid=id||('midi_'+Date.now().toString(36));if(STYLES.some(s=>s.id===sid))return STYLES.find(s=>s.id===sid);const s={id:sid,g:'Ritmos Brasileiros',n:d.name||'Levada MIDI',full:'Ritmos Brasileiros-'+(d.name||'Levada MIDI'),bpm:d.bpm||120,sw:.5,piano:'piano',bass:'electric',kit:'kit',bk:'midi',d4:[],d3:[],c4:[],c3:[],midi:true,midiBeats:d.beats||4,midiBars:d.bars||[]};STYLES.push(s);return s;}
+function midiStylesLoad(){if(window._lmMidiLoaded)return;window._lmMidiLoaded=true;try{JSON.parse(localStorage.getItem(MIDI_STORE)||'[]').forEach(x=>midiStyleAdd(x.data,x.id));}catch(e){console.warn('MIDI salvo',e);}}
+function midiStylesSave(){const a=STYLES.filter(s=>s.midi).map(s=>({id:s.id,data:{name:s.n,bpm:s.bpm,beats:s.midiBeats,bars:s.midiBars}}));try{localStorage.setItem(MIDI_STORE,JSON.stringify(a));}catch(e){toast('Armazenamento local cheio: não foi possível guardar a levada MIDI.');}}
+function midiImportData(d,id){const s=midiStyleAdd(d,id);midiStylesSave();toast('Levada adicionada: '+s.n,3000);return s;}
+async function midiLoadRepository(pin){const files=[['APP (LEVADAS).mid','midi_repo_app_levadas'],['rockblocks-beat.mid','midi_repo_rockblocks']];let ok=0,fail=0;for(const [file,id] of files){if(STYLES.some(s=>s.id===id)){ok++;continue;}try{const r=await fetch('./'+encodeURIComponent(file));if(!r.ok)throw Error('HTTP '+r.status);const d=window.LMMidiReader.parse(await r.arrayBuffer(),file);midiImportData(d,id);ok++;}catch(e){fail++;console.warn('MIDI do repositório',file,e);}}if(pin)pStyle(pin);if(fail)toast(ok?'Algumas levadas não puderam ser carregadas.':'Não foi possível baixar os MIDI do repositório.',3500);else toast('Levada(s) do repositório carregada(s).',2500);}
 function mapStyle(name){
   const n=String(name||'').toLowerCase();
   if(/bossa/.test(n))return'bossa';if(/samba|brazil/.test(n))return'samba';if(/bai[aã]o/.test(n))return'baiao';
@@ -1374,6 +1381,7 @@ function playBeat(){
   /* bateria */
   const dp=EX?EX.dr:(nB===3?st.d3:st.d4),kk=nB===3?k:k%4;
   for(const [inst,off,v] of dp){if(Math.floor(off)!==kk)continue;const at=t+swingMap(off-kk,sw)*spb;drum(inst,at,v*(.9+Pl.rnd()*.2),tm.kit);}
+  if(st.midi&&st.midiBars&&st.midiBars.length){const mb=st.midiBars[Pl.pos%st.midiBars.length]||[],ratio=nB/(st.midiBeats||4);for(const ev of mb){const beat=ev.beat*ratio;if(beat<k||beat>=k+1)continue;const at=t+(beat-k)*spb,dur=Math.max(.045,ev.len*ratio*spb),vel=ev.velocity||.65;if(ev.role==='drums')drum(ev.inst,at,vel,tm.kit);else if(ev.role==='bass')bassNote(ev.note,at,dur,vel,tm.bass);else pianoNote(ev.note,at,dur,vel,tm.piano);}}
   if(st.g==='Jazz'&&sw>.6&&tm.kit!=='none'&&Pl.rnd()<.1&&k%2===0)drum(tm.kit==='brush'?'snare':'rim',t+swingMap(.5,sw)*spb,.25,tm.kit);
   if(S.metro&&Pl.count<=0)clickSound(t,k===0);
   Pl.lastChord=cur;
@@ -1976,10 +1984,14 @@ function pKey(pin){
   $('#pk-m',pin).onclick=()=>go(-1);$('#pk-p',pin).onclick=()=>go(1);
 }
 function pStyle(pin){
-  const cur=P.song.style;let h='';
+  midiStylesLoad();
+  const cur=P.song.style;let h='<div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap"><button class="sub" id="ps-midi-import">＋ Importar MIDI do aparelho</button><button class="sub" id="ps-midi-repo">Carregar MIDI do repositório</button><input type="file" id="ps-midi-file" accept=".mid,.midi,audio/midi" hidden></div>'; 
   ['Jazz','Ritmos Brasileiros','Latin','Pop'].forEach(g=>{h+='<div class="gh">'+g+'</div>'+STYLES.filter(s=>s.g===g).map(s=>'<div class="stl'+(s.id===cur?' on':'')+'" data-s="'+s.id+'"><span>'+esc(s.n)+'</span><span class="g">'+s.bpm+' bpm'+(s.id===cur?' ✓':'')+'</span></div>').join('');});
   pin.style.padding='0';pin.innerHTML=h;
-  $$('.stl',pin).forEach(el=>el.onclick=()=>{P.song.style=el.dataset.s;delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
+  $('.stl',pin).forEach(el=>el.onclick=()=>{P.song.style=el.dataset.s;delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
+  $('#ps-midi-import',pin).onclick=()=>$('#ps-midi-file',pin).click();
+  $('#ps-midi-file',pin).onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const d=window.LMMidiReader.parse(await file.arrayBuffer(),file.name),s=midiImportData(d);P.song.style=s.id;P.song.bpm=d.bpm||P.song.bpm;saveSoon();updateCtrl();pStyle(pin);}catch(err){toast('Falha ao ler MIDI: '+(err.message||err),4000);}e.target.value='';};
+  $('#ps-midi-repo',pin).onclick=()=>midiLoadRepository(pin);
   const st=$('.stl.on',pin);if(st)st.scrollIntoView({block:'center'});
 }
 const TXT_T=['Desligada','+2 bpm a cada refrão','+4 bpm a cada refrão','+6 bpm a cada refrão','+10 bpm a cada refrão'];
@@ -2319,7 +2331,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save();});
 ICP.shuffle='M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z';
 ICP.lib='M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 5h-3v5.5c0 1.38-1.12 2.5-2.5 2.5S10 13.88 10 12.5s1.12-2.5 2.5-2.5c.57 0 1.08.19 1.5.51V5h4v2zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6z';
 $('#home-q').oninput=homeSearch;
-setIcons();load();applyTheme();show('home');renderHome();setTimeout(sfBoot,600);
+setIcons();load();midiStylesLoad();applyTheme();show('home');renderHome();setTimeout(sfBoot,600);
 
 
 /* =====================================================================
