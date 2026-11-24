@@ -1890,7 +1890,7 @@ function nav(d){const ids=P.ctx.ids||[];const i=ids.indexOf(P.song.id);const j=i
 function curKeyLabel(){return shiftKey(P.song.key,P.shift,useFlats(P.song.key,P.shift));}
 function updateCtrl(){
   const s=P.song;$('#t-bpm').textContent=(Pl.on?Pl.bpm:s.bpm)+' bpm';$('#t-reps').textContent=(S.reps>=21?'∞':S.reps)+'x';$('#t-key').textContent=curKeyLabel();$('#t-style').innerHTML='<svg viewBox="0 0 30 20"><path d="M2 10c3-9 6-9 9 0s6 9 9 0 5-6 8-3"/></svg><span>Estilo: <b>'+esc(styleById(s.style).full)+'</b></span>';
-  $('#b-play').innerHTML=ic(Pl.on?'pause':'play');updateLoopBtn();
+  $('#b-play').innerHTML=ic(Pl.on?'pause':'play');const lp=$('#live-pause');if(lp)lp.innerHTML=ic(Pl.on?'pause':'play');updateLoopBtn();
 }
 function setPHead(){const ids=P.ctx.ids||[],i=ids.indexOf(P.song.id);$('#p-backl').textContent=P.ctx.name||'Músicas';$('#p-title').textContent=(i>=0&&ids.length>1)?(i+1)+' / '+ids.length:'';}
 $('#p-back').onclick=()=>{stopAudioUI();const c=P.ctx;if(c&&c.home)goHome();else if(L.coll&&c&&c.name)show('list'),renderList();else goHome();};
@@ -1909,8 +1909,8 @@ function togglePlay(){
   if(Pl.on){const b=P.curBar;stopAudioUI();if(b>=0){P.startBar=b;renderChart();}return;}
   if(!P.song.bars.length)return;
   if(!startPlayback(P.song,P.startBar))return;
-  $('#b-play').innerHTML=ic('pause');P.raf=requestAnimationFrame(uiLoop);
-  closePanel();$('#v-player').classList.add('playing');document.body.classList.add('pl-on');$('#fab').innerHTML=ic('pause');
+  $('#b-play').innerHTML=ic('pause');$('#live-pause').innerHTML=ic('pause');P.raf=requestAnimationFrame(uiLoop);
+  closePanel();$('#v-player').classList.remove('controls-visible');$('#v-player').classList.add('playing');document.body.classList.add('pl-on');$('#fab').innerHTML=ic('pause');
 }
 $('#fab').onclick=togglePlay;
 $('#live-pause').onclick=togglePlay;
