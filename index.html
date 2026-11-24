@@ -231,6 +231,18 @@ body[data-v=editor] #nav,body.pl-on #nav{display:none}
 #v-player.playing #ctrl{position:absolute;top:8px;left:0;right:0;border:0;background:transparent;padding:0;pointer-events:none;z-index:4}
 #v-player.playing #countbadge{margin:0 auto}
 #v-player.playing #chartwrap{padding-top:34px;margin-top:8px}
+/* Controles sob demanda durante a reprodução: tocar na cifra revela sem pausar. */
+#v-player.playing.controls-visible #ctrl{position:absolute;top:auto;left:0;right:0;bottom:0;z-index:6;padding:8px 14px calc(8px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,rgba(0,0,0,.86) 18%,rgba(0,0,0,.96));pointer-events:auto}
+#v-player.playing.controls-visible .tabs{display:grid}
+#v-player.playing.controls-visible .stylebtn{display:flex;width:calc(100% - 66px);margin-top:8px}
+#v-player.playing.controls-visible #panel{display:block}
+#v-player.playing.controls-visible #countbadge{display:none!important}
+#v-player.playing.controls-visible #fab{display:none}
+#v-player.playing.controls-visible #fabm{top:10px;bottom:auto;right:12px}
+#live-pause{display:none;position:absolute;right:14px;bottom:8px;width:54px;height:50px;border:1px solid var(--ac);border-radius:16px;background:var(--bg2);color:var(--ac);place-items:center;z-index:8}
+#live-pause svg{width:25px;height:25px}
+#v-player.playing.controls-visible #live-pause{display:grid}
+#v-player.playing.controls-visible #panel{max-height:min(48vh,420px)}
 
 /* ===== editor ===== */
 #edgrid{flex:1;overflow:auto;padding-bottom:20px}
@@ -435,6 +447,7 @@ body[data-v=editor] #nav,body.pl-on #nav{display:none}
       <div id="countbadge"></div>
       <div class="tabs"><button id="t-bpm"></button><button id="t-reps"></button><button id="t-key"></button><button id="t-loop">Loop</button><button id="b-stop" class="sq" aria-label="Parar"></button></div>
       <button class="stylebtn" id="t-style"></button>
+      <button id="live-pause" aria-label="Pausar reprodução" title="Pausar"></button>
     </div>
   </section>
 
@@ -1877,7 +1890,7 @@ function nav(d){const ids=P.ctx.ids||[];const i=ids.indexOf(P.song.id);const j=i
 function curKeyLabel(){return shiftKey(P.song.key,P.shift,useFlats(P.song.key,P.shift));}
 function updateCtrl(){
   const s=P.song;$('#t-bpm').textContent=(Pl.on?Pl.bpm:s.bpm)+' bpm';$('#t-reps').textContent=(S.reps>=21?'∞':S.reps)+'x';$('#t-key').textContent=curKeyLabel();$('#t-style').innerHTML='<svg viewBox="0 0 30 20"><path d="M2 10c3-9 6-9 9 0s6 9 9 0 5-6 8-3"/></svg><span>Estilo: <b>'+esc(styleById(s.style).full)+'</b></span>';
-  $('#b-play').innerHTML=ic(Pl.on?'pause':'play');updateLoopBtn();
+  $('#b-play').innerHTML=ic(Pl.on?'pause':'play');const lp=$('#live-pause');if(lp)lp.innerHTML=ic(Pl.on?'pause':'play');updateLoopBtn();
 }
 function setPHead(){const ids=P.ctx.ids||[],i=ids.indexOf(P.song.id);$('#p-backl').textContent=P.ctx.name||'Músicas';$('#p-title').textContent=(i>=0&&ids.length>1)?(i+1)+' / '+ids.length:'';}
 $('#p-back').onclick=()=>{stopAudioUI();const c=P.ctx;if(c&&c.home)goHome();else if(L.coll&&c&&c.name)show('list'),renderList();else goHome();};
@@ -1896,10 +1909,12 @@ function togglePlay(){
   if(Pl.on){const b=P.curBar;stopAudioUI();if(b>=0){P.startBar=b;renderChart();}return;}
   if(!P.song.bars.length)return;
   if(!startPlayback(P.song,P.startBar))return;
-  $('#b-play').innerHTML=ic('pause');P.raf=requestAnimationFrame(uiLoop);
-  closePanel();$('#v-player').classList.add('playing');document.body.classList.add('pl-on');$('#fab').innerHTML=ic('pause');
+  $('#b-play').innerHTML=ic('pause');$('#live-pause').innerHTML=ic('pause');P.raf=requestAnimationFrame(uiLoop);
+  closePanel();$('#v-player').classList.remove('controls-visible');$('#v-player').classList.add('playing');document.body.classList.add('pl-on');$('#fab').innerHTML=ic('pause');
 }
 $('#fab').onclick=togglePlay;
+$('#live-pause').onclick=togglePlay;
+$('#chartwrap').addEventListener('click',e=>{if(!Pl.on)return;if(e.target.closest('button,a,input,select,textarea'))return;$('#v-player').classList.toggle('controls-visible');});
 function mixLive(){
   const v=$('#v-player');
   if(v.classList.contains('mixlive')){v.classList.remove('mixlive');closePanel();return;}
