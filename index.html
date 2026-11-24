@@ -162,7 +162,7 @@ button.sub:active{background:var(--btn)}
 .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
 .kb{border:1px solid var(--line);background:var(--bg2);border-radius:14px;padding:14px 4px;text-align:center;font-family:var(--serif);font-weight:600;font-size:20px;color:var(--ac)}
 .kb.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
-.stl{display:flex;justify-content:space-between;align-items:center;padding:15px 22px;border-bottom:1px solid var(--line);font-size:18px;font-weight:500;cursor:pointer}
+.stl{display:flex;justify-content:space-between;align-items:center;padding:15px 22px;border-bottom:1px solid var(--line);font-size:18px;font-weight:500;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;pointer-events:auto}
 .stl .g{color:var(--mut);font-size:13px;letter-spacing:.5px}.stl.on{color:var(--ac);font-weight:700}
 .gh{padding:16px 22px 6px;color:var(--mut);font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 .diag{display:flex;justify-content:center;align-items:center;min-height:200px;padding-top:8px}
@@ -171,7 +171,7 @@ button.sub:active{background:var(--btn)}
 
 /* painéis flutuantes de vidro (tudo, exceto o Mixer) */
 #ctrl{position:relative;flex:none;padding:2px 14px 8px}
-#panel:not(.mixer){position:absolute;left:10px;right:10px;bottom:calc(100% + 6px);height:auto;max-height:min(56vh,480px);border:1px solid var(--edge);border-radius:30px;background:var(--gpanel);-webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);box-shadow:0 22px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.2),0 0 40px rgba(255,255,255,.06);opacity:0;visibility:hidden;transform:translateY(14px) scale(.98);transition:opacity .2s,transform .2s,visibility .2s;z-index:6;overflow:auto}
+#panel:not(.mixer){position:absolute;left:10px;right:10px;bottom:calc(100% + 6px);height:auto;max-height:min(56vh,480px);border:1px solid var(--edge);border-radius:30px;background:var(--gpanel);-webkit-backdrop-filter:blur(24px) saturate(1.2);backdrop-filter:blur(24px) saturate(1.2);box-shadow:0 22px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.2),0 0 40px rgba(255,255,255,.06);opacity:0;visibility:hidden;transform:translateY(14px) scale(.98);transition:opacity .2s,transform .2s,visibility .2s;z-index:30;overflow:auto;pointer-events:auto;touch-action:pan-y}
 #panel.open:not(.mixer){opacity:1;visibility:visible;transform:none}
 #panel:not(.mixer) .ptitle{font-family:var(--sans);font-weight:800;font-size:28px;color:var(--ac);text-shadow:0 0 20px var(--glow)}
 #panel:not(.mixer) .bignum{font-family:var(--sans);font-weight:700;text-shadow:0 0 24px var(--glow)}
@@ -2012,7 +2012,15 @@ function pStyle(pin){
   const cur=P.song.style;let h='<div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap"><button class="sub" id="ps-midi-import">＋ Importar MIDI do aparelho</button><button class="sub" id="ps-midi-repo">Carregar MIDI do repositório</button><input type="file" id="ps-midi-file" accept=".mid,.midi,audio/midi" hidden></div>'; 
   ['Jazz','Ritmos Brasileiros','Latin','Pop'].forEach(g=>{h+='<div class="gh">'+g+'</div>'+STYLES.filter(s=>s.g===g).map(s=>'<div class="stl'+(s.id===cur?' on':'')+'" data-s="'+s.id+'"><span>'+esc(s.n)+'</span><span class="g">'+s.bpm+' bpm'+(s.id===cur?' ✓':'')+'</span></div>').join('');});
   pin.style.padding='0';pin.innerHTML=h;
-  $$('.stl',pin).forEach(el=>el.addEventListener('click',()=>{const selected=styleById(el.dataset.s);if(!selected)return;P.song.style=selected.id;P.song.bpm=selected.bpm;if(Pl.on){Pl.bpm=selected.bpm;Pl.lastShownBpm=-1;}delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);}));
+  const chooseStyle=el=>{const selected=styleById(el.dataset.s);if(!selected)return;P.song.style=selected.id;P.song.bpm=selected.bpm;if(Pl.on){Pl.bpm=selected.bpm;Pl.lastShownBpm=-1;}delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);};
+  /* Delegação no painel: pointerup cobre toque, caneta e mouse no Android/WebView.
+     O movimento é medido para não selecionar um estilo ao rolar a lista. */
+  let stylePointer=null;
+  pin.addEventListener('pointerdown',e=>{const el=e.target.closest('.stl');if(!el||!pin.contains(el))return;stylePointer={el,x:e.clientX,y:e.clientY,id:e.pointerId};},true);
+  pin.addEventListener('pointerup',e=>{if(!stylePointer||stylePointer.id!==e.pointerId)return;const p=stylePointer;stylePointer=null;if(Math.hypot(e.clientX-p.x,e.clientY-p.y)>12)return;if(!p.el.isConnected)return;e.preventDefault();e.stopPropagation();chooseStyle(p.el);},true);
+  pin.addEventListener('pointercancel',()=>{stylePointer=null;},true);
+  /* Acesso por teclado: click sintético (detail 0). */
+  pin.addEventListener('click',e=>{if(e.detail!==0)return;const el=e.target.closest('.stl');if(el&&pin.contains(el)){e.preventDefault();e.stopPropagation();chooseStyle(el);}},true);
   $('#ps-midi-import',pin).onclick=()=>$('#ps-midi-file',pin).click();
   $('#ps-midi-file',pin).onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const d=window.LMMidiReader.parse(await file.arrayBuffer(),file.name),s=midiImportData(d);P.song.style=s.id;P.song.bpm=d.bpm||P.song.bpm;saveSoon();updateCtrl();pStyle(pin);}catch(err){toast('Falha ao ler MIDI: '+(err.message||err),4000);}e.target.value='';};
   $('#ps-midi-repo',pin).onclick=()=>midiLoadRepository(pin);
