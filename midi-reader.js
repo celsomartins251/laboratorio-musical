@@ -39,7 +39,7 @@ function parse(input,name){
    else bars[bi].push({role,beat,len,velocity:e.velocity/127,note:e.note});
   }
  }
- bars.forEach(b=>b.sort((a,c)=>a.beat-c.beat));if(!bars.some(b=>b.length))throw Error('O MIDI não contém notas utilizáveis.');
+ bars.forEach(b=>b.sort((a,c)=>a.beat-c.beat));while(bars.length>1&&!bars[bars.length-1].length)bars.pop();if(!bars.some(b=>b.length))throw Error('O MIDI não contém notas utilizáveis.');
  return{name:(name||'Levada MIDI').replace(/\.(mid|midi)$/i,''),bpm:Math.max(30,Math.min(300,Math.round(60000000/tempo))),beats,bars,format:fmt,ppq,tracks:tracks.length};
 }
 window.LMMidiReader={parse};
