@@ -1823,7 +1823,7 @@ function renderChart(){
   const c=$('#chart');c.dataset.font=S.font;c.classList.toggle('nohi',!S.hiMarks);
   c.innerHTML=chartHTML(P.song,{shift:P.shift,start:P.startBar});fitChart(c);applyLoopHi();
 }
-$('#chartwrap').addEventListener('click',e=>{if(P.panel){closePanel();e.stopPropagation();}},true);
+$('#chartwrap').addEventListener('click',e=>{if(e.target.closest('#panel'))return;if(P.panel){closePanel();e.stopPropagation();}},true);
 $('#chart').addEventListener('click',e=>{
   const b=e.target.closest('.bar');if(!b||!P.song)return;const i=+b.dataset.i;
   if(P.loopSel){selLoopBar(i);return;}
