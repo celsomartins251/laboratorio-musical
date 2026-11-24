@@ -2003,7 +2003,7 @@ function pStyle(pin){
   const cur=P.song.style;let h='<div style="padding:12px 18px;display:flex;gap:8px;flex-wrap:wrap"><button class="sub" id="ps-midi-import">＋ Importar MIDI do aparelho</button><button class="sub" id="ps-midi-repo">Carregar MIDI do repositório</button><input type="file" id="ps-midi-file" accept=".mid,.midi,audio/midi" hidden></div>'; 
   ['Jazz','Ritmos Brasileiros','Latin','Pop'].forEach(g=>{h+='<div class="gh">'+g+'</div>'+STYLES.filter(s=>s.g===g).map(s=>'<div class="stl'+(s.id===cur?' on':'')+'" data-s="'+s.id+'"><span>'+esc(s.n)+'</span><span class="g">'+s.bpm+' bpm'+(s.id===cur?' ✓':'')+'</span></div>').join('');});
   pin.style.padding='0';pin.innerHTML=h;
-    $('.stl',pin).forEach(el=>el.onclick=()=>{P.song.style=el.dataset.s;delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
+    $$( ''.stl',pin).forEach(el=>el.onclick=()=>{P.song.style=el.dataset.s;delete P.song.styleOrig;saveSoon();updateCtrl();pStyle(pin);});
   $('#ps-midi-import',pin).onclick=()=>$('#ps-midi-file',pin).click();
   $('#ps-midi-file',pin).onchange=async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{const d=window.LMMidiReader.parse(await file.arrayBuffer(),file.name),s=midiImportData(d);P.song.style=s.id;P.song.bpm=d.bpm||P.song.bpm;saveSoon();updateCtrl();pStyle(pin);}catch(err){toast('Falha ao ler MIDI: '+(err.message||err),4000);}e.target.value='';};
   $('#ps-midi-repo',pin).onclick=()=>midiLoadRepository(pin);
